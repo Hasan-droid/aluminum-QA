@@ -33,7 +33,7 @@ def driver():
     chrome_options.add_argument('--disable-gpu')
     
     # Optional: Use headless mode (remove if you want to see the browser)
-   +- # chrome_options.add_argument('--headless=new')
+    # chrome_options.add_argument('--headless=new')
     
     # Optional: Set remote debugging port (can help with DevTools issues)
     chrome_options.add_argument('--remote-debugging-port=9222')
