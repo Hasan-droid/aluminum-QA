@@ -1,9 +1,11 @@
 from alumnium import Alumni
 from selenium.webdriver import Chrome
+import json
 import time
 
-# Module-level variable to share URL between tests
+# Module-level variables to share state between tests
 new_URL = None
+cooke_json = None
 
 def test_login(al: Alumni, driver: Chrome):
     driver.get(f"http://172.16.2.56:3005/?redirect_uri=http%3A%2F%2F172.16.2.56%3A3002")
@@ -26,7 +28,26 @@ def test_after_login(al: Alumni, driver: Chrome):
     print(f"the new URL {new_URL}")
     driver.get(new_URL)
     
-
+    
     al.do("hover the 'العربية' button on the navigation bar")
     al.do("Click the 'العربية' button on the navigation bar")
+
+    al.do("Click on 'تعريف الخدمات' card")
+
+    al.do("Click on 'الخدمات الفرعية' sub-tab")
+    time.sleep(3)
+    global cooke_json
+    cooke = driver.get_cookies()
+    cooke_json = json.dumps(cooke)
+    time.sleep(3)
     
+
+def test_after_login2(al: Alumni, driver: Chrome):
+    global cooke_json
+    cookies = json.loads(cooke_json) if cooke_json else []
+    driver.get("http://172.16.2.56:3002/health")
+    for cookie in cookies:
+        driver.add_cookie(cookie)
+    driver.get("http://172.16.2.56:3002/services/definition")
+    
+    al.do("Click on 'الخدمات الفرعية' sub-tab")
