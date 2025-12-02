@@ -19,9 +19,12 @@ import time
 from pytest import hookimpl
 
 
+# Register custom markers for scenario 1 and scenario 2
+def pytest_configure(config):
+    config.addinivalue_line("markers", "scenario1: Run test in scenario 1")
+    config.addinivalue_line("markers", "scenario2: Run test in scenario 2")
 
-
-@fixture
+@fixture(scope="function")
 def driver():
     chrome_options = Options()
     # Specify Chromium binary path (since it's installed via snap)
@@ -31,12 +34,17 @@ def driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
+
+    # Use unique remote debugging port per worker to avoid conflicts
+    import os 
+    worker_id = os.environ.get("PYTEST_XDIST_WORKER", 'gw0')
+    port = 9222 + hash(worker_id) % 1000 #Generate a unique port for each worker
     
     # Optional: Use headless mode (remove if you want to see the browser)
     # chrome_options.add_argument('--headless=new')
     
     # Optional: Set remote debugging port (can help with DevTools issues)
-    chrome_options.add_argument('--remote-debugging-port=9222')
+    chrome_options.add_argument(f'--remote-debugging-port={port}')
     
     # Your existing security/SSL options
     chrome_options.add_argument('--ignore-certificate-errors')
@@ -77,7 +85,7 @@ def pytest_runtest_makereport(item):
             print("doc not saved")
 
 
-@fixture
+@fixture(scope="function")
 def al(driver: Chrome):
     al = Alumni(driver)
     yield al
