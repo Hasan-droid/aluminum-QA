@@ -1,9 +1,7 @@
 from alumnium import Alumni
-from langchain_core.runnables.config import P
+# from langchain_core.runnables.config import P
 from selenium.webdriver import Chrome
 import time
-
-from sqlalchemy.orm import contains_alias
 
 def test_login(al: Alumni, driver: Chrome):
     driver.get(f"https://193.188.64.53/index-rtl.html")
