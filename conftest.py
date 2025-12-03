@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+from video_recording import VideoRecording
 
 # Configure to use Ollama instead of OpenAI - MUST be set before importing alumnium
 # Using custom Ollama server at http://192.168.6.177:11435
@@ -14,6 +16,7 @@ os.environ['OPENAI_API_KEY'] = 'sk-proj-cmftCUs8XR35s76XRtHpbsIcgnJNd-GVffBwsU7g
 # append the correct endpoint internally.
 
 os.environ['ALUMNIUM_CACHE'] = 'filesystem'
+
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -24,10 +27,30 @@ import time
 from pytest import hookimpl
 
 
+# Register custom markers for scenario 1 and scenario 2
+def pytest_configure(config):
+    config.addinivalue_line("markers", "scenario1: Run test in scenario 1")
+    config.addinivalue_line("markers", "scenario2: Run test in scenario 2")
 
+@fixture(scope="session", autouse=True)
+def cleanup_videos():
+    """Delete all videos at the start of test session"""
+    video_dir = Path("videos")
+    video_dir.mkdir(exist_ok=True)  # Create directory first
+    
+    # Delete all files in the directory
+    if video_dir.exists():
+        print("Cleaning up videos directory...")
+        for file in video_dir.glob("*"):
+            try:
+                if file.is_file():
+                    file.unlink()
+            except Exception as e:
+                print(f"Warning: Could not delete {file}: {e}")
+    yield
 
-@fixture
-def driver():
+@fixture(scope="function")
+def driver(request):
     chrome_options = Options()
     # Specify Chromium binary path (since it's installed via snap)
     chrome_options.binary_location = "/snap/bin/chromium"
@@ -36,12 +59,17 @@ def driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
+
+    # Use unique remote debugging port per worker to avoid conflicts
+    import os 
+    worker_id = os.environ.get("PYTEST_XDIST_WORKER", 'gw0')
+    port = 9222 + hash(worker_id) % 1000 #Generate a unique port for each worker
     
     # Optional: Use headless mode (remove if you want to see the browser)
     # chrome_options.add_argument('--headless=new')
     
     # Optional: Set remote debugging port (can help with DevTools issues)
-    chrome_options.add_argument('--remote-debugging-port=9222')
+    chrome_options.add_argument(f'--remote-debugging-port={port}')
     
     # Your existing security/SSL options
     chrome_options.add_argument('--ignore-certificate-errors')
@@ -63,7 +91,21 @@ def driver():
     # Use Selenium Manager (built into Selenium 4.11+) - automatically handles ChromeDriver
     # It will detect Chromium version 142 and download matching ChromeDriver
     driver = Chrome(options=chrome_options)
+
+    # Set a fixed window size to ensure consistent screenshots
+    driver.set_window_size(1920, 1080)
+    
+    video_recording = VideoRecording(driver, request)
+    
+    video_recording.start_capture()
+
     yield driver
+
+    video_recording.stop_capture()
+    video_recording.save_video()
+    
+    
+
     driver.quit()
 
 @hookimpl(hookwrapper=True)
@@ -82,7 +124,7 @@ def pytest_runtest_makereport(item):
             print("doc not saved")
 
 
-@fixture
+@fixture(scope="function")
 def al(driver: Chrome):
     al = Alumni(driver)
     yield al

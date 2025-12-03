@@ -1,3 +1,4 @@
+import pytest
 from alumnium import Alumni
 from selenium.webdriver import Chrome
 import json
@@ -7,6 +8,8 @@ import time
 new_URL = None
 cooke_json = None
 
+@pytest.mark.scenario2
+@pytest.mark.order(1)
 def test_login(al: Alumni, driver: Chrome):
     driver.get(f"http://172.16.2.56:3005/?redirect_uri=http%3A%2F%2F172.16.2.56%3A3002")
     driver.maximize_window()
@@ -23,6 +26,8 @@ def test_login(al: Alumni, driver: Chrome):
     new_URL = driver.current_url
     
 
+@pytest.mark.scenario2
+@pytest.mark.order(2)
 def test_after_login(al: Alumni, driver: Chrome):
     global new_URL
     print(f"the new URL {new_URL}")
@@ -41,7 +46,8 @@ def test_after_login(al: Alumni, driver: Chrome):
     cooke_json = json.dumps(cooke)
     time.sleep(3)
     
-
+@pytest.mark.scenario2
+@pytest.mark.order(3)
 def test_after_login2(al: Alumni, driver: Chrome):
     global cooke_json
     cookies = json.loads(cooke_json) if cooke_json else []
