@@ -1,16 +1,21 @@
 import os
 from pathlib import Path
 from video_recording import VideoRecording
+import logging
+from pythonjsonlogger import jsonlogger
+from datetime import datetime
+import traceback
+
 
 # Configure to use Ollama instead of OpenAI - MUST be set before importing alumnium
 # Using custom Ollama server at http://192.168.6.177:11435
 # Model: mistral-small3.1:24b
-# os.environ['ALUMNIUM_MODEL'] = 'ollama/llama3.1:70b'
-# os.environ['ALUMNIUM_OLLAMA_URL'] = 'http://192.168.6.177:11435'
+os.environ['ALUMNIUM_MODEL'] = 'ollama/llama3.1:70b'
+os.environ['ALUMNIUM_OLLAMA_URL'] = 'http://192.168.6.177:11435'
 
 
-os.environ['ALUMNIUM_MODEL'] = 'openai'
-os.environ['OPENAI_API_KEY'] = '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'
+# os.environ['ALUMNIUM_MODEL'] = 'openai'
+# os.environ['OPENAI_API_KEY'] = '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'
 
 # Native client expects the base Ollama URL (without /api/generate) so the server can
 # append the correct endpoint internally.
@@ -31,6 +36,28 @@ from pytest import hookimpl
 def pytest_configure(config):
     config.addinivalue_line("markers", "scenario1: Run test in scenario 1")
     config.addinivalue_line("markers", "scenario2: Run test in scenario 2")
+
+    #Setup JSON logging
+    log_dir=Path("logs")
+    log_dir.mkdir(exist_ok=True)
+
+    logger=logging.getLogger("test_cases_automation")
+    logger.setLevel(logging.INFO)
+
+    #Remove existing handlers
+    logger.handlers.clear()
+
+    log_file=log_dir / f"test_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    file_handler=logging.FileHandler(log_file)
+    formatter=jsonlogger.JsonFormatter()
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    console_handler=logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+    logger.addHandler(console_handler)
+
+    return logger
 
 @fixture(scope="session", autouse=True)
 def cleanup_videos():
@@ -109,19 +136,91 @@ def driver(request):
     driver.quit()
 
 @hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item):
+def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
+
+    #Get logger from logging module
+    logger=logging.getLogger("test_cases_automation")
+
     print("Running cache")
     if report.when == "call":
         # Assuming `al` is an instance of `Alumni`.
         al = item.funcargs["al"]
+        driver = item.funcargs.get("driver")
+
+        #Extract test information for logging
+        test_name=item.nodeid
+        scenario=None;
+        for marker in item.iter_markers():
+            if marker.name.startswith("scenario"):
+                scenario=marker.name.replace("scenario", "")
+                break
+        current_url=None;
+        page_title=None;
+        if driver:
+            try:
+                current_url=driver.current_url
+                page_title=driver.title
+            except:
+                pass
+
+        #Log test result
         if report.passed:
             al.cache.save()
+            logger.info("Test passed", extra={
+                "test_name": test_name,
+                "scenario": scenario,
+                "status": "passed",
+                "duration": f"{report.duration:.2f}s",
+                "when": report.when,
+                "url": current_url,
+                "page_title": page_title
+            })
             print("doc saved")
-        else:
+        elif report.failed:
             al.cache.discard()
-            print("doc not saved")
+            
+            #Extract error details
+            error_type=None;
+            error_message=None;
+            error_traceback=None;
+
+            if call.excinfo:
+                error_type = call.excinfo.typename
+                error_message = str(call.excinfo.value) if call.excinfo.value else None
+                # Get formatted traceback
+                error_traceback = ''.join(traceback.format_exception(
+                    call.excinfo.type,
+                    call.excinfo.value,
+                    call.excinfo.tb
+                ))
+
+                    # Log failure with comprehensive details
+            logger.error("Test failed", extra={
+                "test_name": test_name,
+                "scenario": scenario,
+                "status": "failed",
+                "duration": f"{report.duration:.2f}s",
+                "when": report.when,
+                "error_type": error_type,
+                "error_message": error_message,
+                "error_traceback": error_traceback,
+                "url": current_url,
+                "page_title": page_title,
+                "longrepr": str(report.longrepr) if report.longrepr else None
+            }, exc_info=call.excinfo)
+            
+        elif report.skipped:
+            logger.warning("Test skipped", extra={
+                "test_name": test_name,
+                "scenario": scenario,
+                "status": "skipped",
+                "reason": str(report.longrepr) if report.longrepr else "Unknown reason",
+                "when": report.when
+            })
+
+
 
 
 @fixture(scope="function")
