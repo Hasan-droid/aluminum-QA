@@ -5,12 +5,13 @@ import logging
 from pythonjsonlogger import jsonlogger
 from datetime import datetime
 import traceback
+import json
 
-
+_log_entries = []
 # Configure to use Ollama instead of OpenAI - MUST be set before importing alumnium
 # Using custom Ollama server at http://192.168.6.177:11435
 # Model: mistral-small3.1:24b
-os.environ['ALUMNIUM_MODEL'] = 'ollama/llama3.1:70b'
+os.environ['ALUMNIUM_MODEL'] = 'ollama/qwen3-vl:32b'
 os.environ['ALUMNIUM_OLLAMA_URL'] = 'http://192.168.6.177:11435'
 
 
@@ -47,17 +48,61 @@ def pytest_configure(config):
     #Remove existing handlers
     logger.handlers.clear()
 
-    log_file=log_dir / f"test_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    file_handler=logging.FileHandler(log_file)
-    formatter=jsonlogger.JsonFormatter()
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    #Custom handler that collects logs in memory
+    class ListHandler(logging.Handler):
+        def emit(self, record):
+            formatter=jsonlogger.JsonFormatter()
+            log_entry = json.loads(formatter.format(record))
+            _log_entries.append(log_entry)
 
+    list_handler=ListHandler()
+    logger.addHandler(list_handler)
+
+    #Console handler for immdiate output
     console_handler=logging.StreamHandler()
     console_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
     logger.addHandler(console_handler)
 
+    
+    # Store log file path and start time for report
+    config._log_file = log_dir / f"test_run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    config._test_start_time = datetime.now()
+
     return logger
+
+
+
+# Write JSON array wrapped in report at the end of test session
+def pytest_sessionfinish(session, exitstatus):
+    """Write all collected logs as a JSON array wrapped in a report"""
+    log_file = getattr(session.config, '_log_file', None)
+    start_time = getattr(session.config, '_test_start_time', datetime.now())
+    
+    if log_file and _log_entries:
+        # Create report structure with metadata and logs array
+        report = {
+            "test_run": {
+                "start_time": start_time.isoformat(),
+                "end_time": datetime.now().isoformat(),
+                "total_tests": len(_log_entries),
+                "passed": len([e for e in _log_entries if e.get("status") == "passed"]),
+                "failed": len([e for e in _log_entries if e.get("status") == "failed"]),
+                "skipped": len([e for e in _log_entries if e.get("status") == "skipped"]),
+                "exit_status": exitstatus
+            },
+            "logs": _log_entries  # Array of all log entries
+        }
+        
+        try:
+            with open(log_file, 'w', encoding='utf-8') as f:
+                json.dump(report, f, indent=2, ensure_ascii=False)
+            print(f"\n✓ Test report saved to {log_file}")
+            print(f"  Total: {report['test_run']['total_tests']}, "
+                  f"Passed: {report['test_run']['passed']}, "
+                  f"Failed: {report['test_run']['failed']}, "
+                  f"Skipped: {report['test_run']['skipped']}")
+        except Exception as e:
+            print(f"\n✗ Failed to save report: {e}")
 
 @fixture(scope="session", autouse=True)
 def cleanup_videos():
