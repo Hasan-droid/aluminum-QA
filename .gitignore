@@ -10,3 +10,16 @@ wheels/
 .venv
 *.json
 *.mp4
+*.log
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+*.webp
+*.svg
+*.pdf
+*.docx
+*.doc
