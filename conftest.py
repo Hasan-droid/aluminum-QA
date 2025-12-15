@@ -11,12 +11,12 @@ _log_entries = []
 # Configure to use Ollama instead of OpenAI - MUST be set before importing alumnium
 # Using custom Ollama server at http://192.168.6.177:11435
 # Model: mistral-small3.1:24b
-os.environ['ALUMNIUM_MODEL'] = 'ollama/qwen3-vl:32b'
-os.environ['ALUMNIUM_OLLAMA_URL'] = 'http://192.168.6.177:11435'
+# os.environ['ALUMNIUM_MODEL'] = 'ollama/qwen3-vl:32b'
+# os.environ['ALUMNIUM_OLLAMA_URL'] = 'http://192.168.6.177:11435'
 
 
-# os.environ['ALUMNIUM_MODEL'] = 'openai'
-# os.environ['OPENAI_API_KEY'] = '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'
+os.environ['ALUMNIUM_MODEL'] = 'openai'
+os.environ['OPENAI_API_KEY'] = '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'
 
 # Native client expects the base Ollama URL (without /api/generate) so the server can
 # append the correct endpoint internally.
