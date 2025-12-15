@@ -36,7 +36,7 @@ class VideoRecording:
 
         # Target a higher capture frequency (more FPS in output video)
         # Previous value was 0.5s (≈2 FPS). Use 0.1s for up to ~10 FPS.
-        capture_interval = 0.05
+        capture_interval = 0.1
 
         while not self.stop_event.is_set():
             for idx, drv in enumerate(self.drivers):
