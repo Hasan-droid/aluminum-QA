@@ -1,7 +1,7 @@
 from alumnium import Alumni
-# from langchain_core.runnables.config import P
 from selenium.webdriver import Chrome
 import time
+
 
 def test_login(al: Alumni, driver: Chrome):
     driver.get(f"https://193.188.64.53/index-rtl.html")
@@ -12,6 +12,7 @@ def test_login(al: Alumni, driver: Chrome):
     print("username done")
     al.do(("Type P@ssw0rd into password field"))
     print("password done")
+
     # code = al.get("text from PNG image under password field, captcha div", vision=True)
     # print(f"captcha done{code}")
     # time.sleep(2)
@@ -20,13 +21,13 @@ def test_login(al: Alumni, driver: Chrome):
     # time.sleep(2)
     al.do("click login button")
     print("login button done")
-    # time.sleep(5)
+
     # al.do("click 'موافق' button")
     # print("موافق button done")
-    # time.sleep(2)
+
     # al.do("Click 'طلباتي' button")
     # print("طلباتي button done")
-    # time.sleep(2)
+
     # al.do("click 'x' button on the popup")
     # print("x button done")
 
