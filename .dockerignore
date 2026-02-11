@@ -1,0 +1,13 @@
+.git
+.gitignore
+.python-version
+__pycache__
+*.pyc
+.venv
+venv
+*.log
+logs
+videos
+.env
+*.md
+!README.md

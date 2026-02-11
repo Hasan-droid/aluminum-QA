@@ -128,45 +128,53 @@ def cleanup_videos():
 @fixture(scope="function")
 def driver(request):
     chrome_options = Options()
-    # Specify Chromium binary path (since it's installed via snap)
-    chrome_options.binary_location = "/snap/bin/chromium"
-    
+    # Browser path: use CHROMIUM_BIN (Docker), or /snap/bin/chromium if it exists, else leave unset for Selenium Manager
+    chromium_bin = os.environ.get("CHROMIUM_BIN")
+    if not chromium_bin and Path("/snap/bin/chromium").is_file():
+        chromium_bin = "/snap/bin/chromium"
+    if chromium_bin:
+        chrome_options.binary_location = chromium_bin
+
     # CRITICAL: Required for WSL2/headless environments to fix DevToolsActivePort error
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--disable-gpu')
 
     # Use unique remote debugging port per worker to avoid conflicts
-    import os 
-    worker_id = os.environ.get("PYTEST_XDIST_WORKER", 'gw0')
-    port = 9222 + hash(worker_id) % 1000 #Generate a unique port for each worker
-    
-    # Optional: Use headless mode (remove if you want to see the browser)
-    # chrome_options.add_argument('--headless=new')
-    
+    worker_id = os.environ.get("PYTEST_XDIST_WORKER", "gw0")
+    port = 9222 + hash(worker_id) % 1000
+
+    # Headless when running in Docker (no display)
+    if os.environ.get("RUNNING_IN_DOCKER") or Path("/.dockerenv").exists():
+        chrome_options.add_argument("--headless=new")
+
     # Optional: Set remote debugging port (can help with DevTools issues)
     chrome_options.add_argument(f'--remote-debugging-port={port}')
-    
+
     # Your existing security/SSL options
     chrome_options.add_argument('--ignore-certificate-errors')
     chrome_options.add_argument('--ignore-ssl-errors')
     chrome_options.add_argument('--allow-running-insecure-content')
     chrome_options.add_argument('--disable-web-security')
     chrome_options.add_argument('--ignore-certificate-errors-spki-list')
-    
+
     # Window size for consistent rendering
     chrome_options.add_argument('--window-size=1920,1080')
-    
+
     chrome_prefs = {
         "credentials_enable_service": False,
         "profile.password_manager_enabled": False,
         "profile.password_protection_enabled": False,
     }
     chrome_options.add_experimental_option("prefs", chrome_prefs)
-    
-    # Use Selenium Manager (built into Selenium 4.11+) - automatically handles ChromeDriver
-    # It will detect Chromium version 142 and download matching ChromeDriver
-    driver = Chrome(options=chrome_options)
+
+    # In Docker: use system chromedriver to avoid Selenium Manager. Locally: use Selenium Manager.
+    in_docker = os.environ.get("RUNNING_IN_DOCKER") or Path("/.dockerenv").exists()
+    if in_docker and Path("/usr/bin/chromedriver").is_file():
+        service = Service("/usr/bin/chromedriver")
+        driver = Chrome(service=service, options=chrome_options)
+    else:
+        driver = Chrome(options=chrome_options)
 
     # Set a fixed window size to ensure consistent screenshots
     driver.set_window_size(1920, 1080)
