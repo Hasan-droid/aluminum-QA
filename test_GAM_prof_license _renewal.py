@@ -4,11 +4,12 @@ import time
 from Get_Captch import get_Captcha as captcha
 
 payment_number = None
+application_number = None
 
 def test_license_renewal(al: Alumni, driver: Chrome):
     driver.get(fr"http://10.0.81.212:8080/index-rtl.html")
     driver.maximize_window()
-    time.sleep(10)
+    time.sleep(15)
 
     #تسجيل الدخول
     al.do("Type '9721041581' into 'اسم المستخدم / الرقم الوطني' field")
@@ -73,9 +74,13 @@ def test_license_renewal(al: Alumni, driver: Chrome):
     al.do("hover on 'موافق' button")
     al.do("click on 'موافق' button")
 
+    global application_number
     global payment_number
-    payment_number = al.get("'رقم الدفع المرجع'payment number")
-    print(f"application number: {payment_number}")
+    payment_number = al.get("'رقم الدفع المرجع' payment number from 'رقم الدفع المرجع' field")
+    print(f"Payment number: {payment_number}")
+    application_number = al.get("'رقم الطلب' application number from 'رقم الطلب' field")
+    print(f"application number: {application_number}")
+
     print("تم تقديم الطلب في الخطوة الرابعة")
 
     al.do("hover on 'إغلاق' button")
@@ -86,31 +91,44 @@ def test_login_to_Admin(al: Alumni, driver: Chrome):
     driver.get(f"http://10.35.21.51:9090/index-rtl.html")
     driver.maximize_window()
 
-    al.do("type 'sec' into 'اسم المستخدم / الرقم الوظيفي' field")
-    print("username done")
-    al.do(("Type 19700434Aa@ into password field"))
-    print("password done")
+    al.do("type 'MxAdmin' into 'اسم المستخدم / الرقم الوظيفي' field")
+    al.do(("Type P@ssw0rd into password field"))
+    code = captcha()
+    al.do(f"type {code} into the textbox (captch) field above login button")
     al.do("click login button")
-    print("login button done")
+    
 
     DDE = al.find("'Development' dropdown link on the navigation bar")
     DDE.click()
-    option = al.find("option 'استعلام عن طلبات' inside the dropdown list")
+    option = al.find("option 'محاكاة الدفع' inside the dropdown list")
     option.click()
-
-    al.do("hover on 'بحث' then click on it")
 
     global payment_number
 
-    al.do(f"type '{payment_number}' into 'رقم الطلب' field")
+    al.do(f"type '{payment_number}' into 'رقم الدفع المرجعي' field")
+
+    al.do("hover on 'دفع' inside the box")
+    al.do("click on 'دفع' button inside the box")
+
+
+    DDE2 = al.find("'Development' dropdown link on the navigation bar")
+    DDE2.click()
+    option2 = al.find("option 'استعلام عن طلبات' inside the dropdown list")
+    option2.click()
+
+    al.do("hover on 'بحث' then click on it")
+
+    global application_number
+
+    al.do(f"type '{application_number}' into 'رقم الطلب' field")
     print("application number done")
     al.do("hover on 'بحث' inside the box")
     al.do("click on 'بحث' button inside the box")
 
-    al.do("hover on 'إلغاء الطلب' button")
-    al.do("click on 'إلغاء الطلب' button")
-    print("إلغاء الطلب button done")
-
-    al.do("hover on 'موافق' button")
-    al.do("click on 'موافق' button")
-    print("موافق button done")
+    applicationTable = al.area("applications table")
+    applicationTable.do(f"click on the application where 'رقم الطلب' equals {application_number}")
+    
+    applicationInfo = al.area("بيانات الطلب الرئيسية box")
+    applicationStatus = applicationInfo.get("value from 'حالة الطلب الرئيسية' field")
+    assert applicationStatus == 'منجز'
+    
