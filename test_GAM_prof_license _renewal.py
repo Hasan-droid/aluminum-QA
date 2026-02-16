@@ -1,3 +1,5 @@
+# فحص تجديد رخصة مهنية ومحاكاة الدفع مع التأكد من إكمال الطلب
+
 from alumnium import Alumni
 from selenium.webdriver import Chrome
 import time
@@ -9,13 +11,15 @@ application_number = None
 def test_license_renewal(al: Alumni, driver: Chrome):
     driver.get(fr"http://10.0.81.212:8080/index-rtl.html")
     driver.maximize_window()
-    time.sleep(15)
+    time.sleep(10)
 
     #تسجيل الدخول
     al.do("Type '9721041581' into 'اسم المستخدم / الرقم الوطني' field")
-    al.do(("Type '19700434Aa@' into password field"))
+    al.do("Type 'P@ssw0rd' into password field")
+
     code = captcha()
-    al.do(f"type {code} into the textbox (captch) above login button")
+    al.do(f"type {code} into the textbox (captcha) field above login button")
+ 
     al.do("click login button")
     print("تم تسجيل الدخول")
 
@@ -36,9 +40,9 @@ def test_license_renewal(al: Alumni, driver: Chrome):
     # الخطوة الأولى
     al.do("type '3519' into 'رقم الرخصة' field")
 
-    DDE = al.find("'المنطقة' dropdown link on the navigation bar") # find dropdown element then click it
+    DDE = al.find("'المنطقة' dropdown field") # find dropdown element then click it
     DDE.click()
-    option = al.find("option 'المدينة' inside the dropdown list")
+    option = al.find("option '1-المدينة' inside the dropdown list")
     option.click()
 
     al.check("'احمد اسعد احمد خيرالله' is in 'اسم المنشأة' field")
@@ -90,27 +94,31 @@ def test_license_renewal(al: Alumni, driver: Chrome):
 def test_login_to_Admin(al: Alumni, driver: Chrome):
     driver.get(f"http://10.35.21.51:9090/index-rtl.html")
     driver.maximize_window()
-
+    time.sleep(5)
+    # تسجيل الدخول
     al.do("type 'MxAdmin' into 'اسم المستخدم / الرقم الوظيفي' field")
-    al.do(("Type P@ssw0rd into password field"))
-    code = captcha()
-    al.do(f"type {code} into the textbox (captch) field above login button")
+    al.do("Type P@ssw0rd into password field")
+    # try:
+    #     code = captcha()
+    #     al.do(f"type {code} into the textbox (captcha) field above login button")
+    # except Exception:
+    #     pass
     al.do("click login button")
     
-
+    # الدفع
     DDE = al.find("'Development' dropdown link on the navigation bar")
     DDE.click()
     option = al.find("option 'محاكاة الدفع' inside the dropdown list")
     option.click()
 
     global payment_number
-
     al.do(f"type '{payment_number}' into 'رقم الدفع المرجعي' field")
 
     al.do("hover on 'دفع' inside the box")
     al.do("click on 'دفع' button inside the box")
+    print("تم الدفع")
 
-
+    # التحقق من اكتمال الطلب
     DDE2 = al.find("'Development' dropdown link on the navigation bar")
     DDE2.click()
     option2 = al.find("option 'استعلام عن طلبات' inside the dropdown list")
@@ -130,5 +138,5 @@ def test_login_to_Admin(al: Alumni, driver: Chrome):
     
     applicationInfo = al.area("بيانات الطلب الرئيسية box")
     applicationStatus = applicationInfo.get("value from 'حالة الطلب الرئيسية' field")
-    assert applicationStatus == 'منجز'
+    assert applicationStatus == 'منجز' , f"الطلب {application_number} غير منجز!"
     
