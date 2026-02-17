@@ -224,21 +224,23 @@ def test_create_payment_number(al: Alumni, driver: Chrome):
     applicationsArea.do("click on 'بحاجة لإجراء' card(button)")
 
     # بحث عن الطلب
-    # al.do("hover on 'بحث' button")
-    # al.do("click on 'بحث' button")
+    al.do("hover on 'بحث' button")
+    al.do("click on 'بحث' button")
 
-    # global application_number
-    # al.do(f"type {application_number} into 'رقم الطلب' field")
-    # al.do("hover on 'بحث' button inside box")
-    # al.do("click on 'بحث' button inside box")   
+    global application_number
+    al.do(f"type {application_number} into 'رقم الطلب' field")
+    al.do("hover on 'بحث' button inside box")
+    al.do("click on 'بحث' button inside box")   
 
-    # al.check(f"{application_number} number is displayed on the table")
+    al.check(f"{application_number} number is displayed on the table")
 
-    # al.do(f"hover on {application_number} row")
-    # al.do(f"click on {application_number} row to make it selected")
+    al.do(f"hover on {application_number} row")
+    al.do(f"click on {application_number} row to make it selected")
 
-    # al.do("hover on 'عرض الطلب' button")
-    # al.do("click on 'عرض الطلب' button")
+    al.do("hover on 'عرض الطلب' button")
+    al.do("click on 'عرض الطلب' button")
+
+    #استخراج رقم الدفع المرجعي 
     applicationMainInfoArea = al.area("'بيانات الطلب الرئيسية' section")
     applicationMainInfoArea.do("hover on 'احتساب الرسوم' button")
     applicationMainInfoArea.do("click on 'احتساب الرسوم' button")
@@ -256,3 +258,51 @@ def test_create_payment_number(al: Alumni, driver: Chrome):
     serviceFeesArea2.do("click on 'إغلاق' button")
 
     #مين الموظف اللي بعدين؟؟؟؟
+
+def test_login_to_Admin_to_complete_Firstpayment(al: Alumni, driver: Chrome):
+    driver.get(f"http://10.35.21.51:9090/index-rtl.html")
+    driver.maximize_window()
+    time.sleep(10)
+    # تسجيل الدخول
+    al.do("type 'MxAdmin' into 'اسم المستخدم / الرقم الوظيفي' field")
+    al.do("Type P@ssw0rd into password field")
+
+    al.do("click login button")
+    print("تم تسجيل الدخول")
+
+    # الدفع
+    DDE = al.find("'Development' dropdown link on the navigation bar")
+    DDE.click()
+    option = al.find("option 'محاكاة الدفع' inside the dropdown list")
+    option.click()
+
+    global payment_number
+    al.do(f"type '{payment_number}' into 'رقم الدفع المرجعي' field")
+
+    al.do("hover on 'دفع' inside the box")
+    al.do("click on 'دفع' button inside the box")
+    print("تم الدفع")    
+
+
+    # التحقق من اكتمال الطلب للدفعة الأولى
+    DDE2 = al.find("'Development' dropdown link on the navigation bar")
+    DDE2.click()
+    option2 = al.find("option 'استعلام عن طلبات' inside the dropdown list")
+    option2.click()
+
+    al.do("hover on 'بحث' then click on it")
+
+    global application_number
+
+    al.do(f"type '{application_number}' into 'رقم الطلب' field")
+    print("application number done")
+    al.do("hover on 'بحث' inside the box")
+    al.do("click on 'بحث' button inside the box")
+
+    applicationTable = al.area("applications table")
+    applicationTable.do(f"click on the application where 'رقم الطلب' equals {application_number}")
+    
+    applicationInfo = al.area("بيانات الطلب الرئيسية box")
+    applicationStatus = applicationInfo.get("value from 'حالة الطلب الرئيسية' field")
+    assert applicationStatus == 'منجز' , f"الطلب {application_number} غير منجز!"
+    
