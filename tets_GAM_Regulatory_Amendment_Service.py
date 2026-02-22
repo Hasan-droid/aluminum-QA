@@ -20,7 +20,7 @@ def test_login(al: Alumni, driver: Chrome):
     time.sleep(12)
     # تسجيل الدخول
     al.do("type MxAdmin into 'اسم المستخدم / الرقم الوظيفي' field")
-    al.do("Type P@ssw0rd into password field")
+    al.do("Type 123456789Aa@ into password field")
     al.do("click login button")
     print("تم تسجيل الدخول")
 
