@@ -157,7 +157,7 @@ def test_login(al: Alumni, driver: Chrome):
             PopupArea.do("hover on 'حفظ' button")
             PopupArea.do("click on 'حفظ' button")
 
-            print(f"row {i} created successfully ")
+            print(f"row {i} created successfully")
 
         except Exception as e:
             print(f'Row {i} failed: {e}')
