@@ -10,7 +10,7 @@ global subServiceType
 
 subServiceType = "خدمة تعديل تنظيمي"
 
-df = pd.read_excel(r"Dummt.xlsx")
+df = pd.read_excel(r"tests/scenario_1/Dummt.xlsx")
 Data = df.to_dict('records')
 DataRows = len(Data)
 
