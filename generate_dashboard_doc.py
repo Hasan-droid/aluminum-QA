@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate dashboard descriptions Word document."""
+"""Generate Arabic dashboard descriptions Word document."""
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -9,319 +9,404 @@ from docx.shared import Inches, Pt, RGBColor
 
 OUTPUT = "/workspace/أوصاف_لوحات_المعلومات.docx"
 
+TAB_PROMPT = (
+    "[صف المحتوى الذي يعرضه هذا التبويب بشكل عام ودون التركيز على القيم: "
+    "المخططات، الجداول، الفلاتر المتاحة فيه]"
+)
+CHART_PROMPT = "[وصف ما يعرضه كل مخطط]"
+
 SECTIONS = [
     {
-        "dashboard_ar": "مسح مقاولي الإنشاءات",
-        "dashboard_en": "Construction Contractors Survey",
+        "dashboard": "مسح مقاولي الإنشاءات",
         "tabs": [
             {
-                "name_ar": "النتائج الرئيسية لمسح مقاولي الإنشاءات حسب المحافظة",
-                "name_en": "Main Results of the Construction Contractors Survey by Governorate",
-                "desc_ar": "لوحة تعرض مؤشرات مسح مقاولي الإنشاءات عبر مخططات بيانية وفلاتر للسنة والمحافظة.",
-                "desc_en": "A dashboard displaying construction contractors survey indicators through charts and filters for year and governorate.",
-                "charts": [],
+                "name": "النتائج الرئيسية لمسح مقاولي الإنشاءات حسب المحافظة",
+                "desc": "لوحة تعرض مؤشرات مسح مقاولي الإنشاءات عبر مخططات بيانية وفلاتر للسنة والمحافظة.",
+                "charts": [
+                    ("عدد المنشآت", "مخطط يعرض عدد المنشآت للمحافظة المحددة حسب السنة."),
+                    ("عدد العاملين", "مخطط يعرض عدد العاملين للمحافظة المحددة حسب السنة."),
+                    ("الإنتاج القائم", "مخطط يعرض الإنتاج القائم للمحافظة المحددة حسب السنة."),
+                    ("إجمالي القيمة المضافة", "مخطط يعرض إجمالي القيمة المضافة للمحافظة المحددة حسب السنة."),
+                    ("الاهتلاك", "مخطط يعرض الاهتلاك للمحافظة المحددة حسب السنة."),
+                    ("الاستهلاك الوسيط", "مخطط يعرض الاستهلاك الوسيط للمحافظة المحددة حسب السنة."),
+                    ("تعويضات العاملين", "مخطط يعرض تعويضات العاملين للمحافظة المحددة حسب السنة."),
+                    ("الضرائب على الإنتاج", "مخطط يعرض الضرائب على الإنتاج للمحافظة المحددة حسب السنة."),
+                    ("تكوين رأس المال الثابت الإجمالي", "مخطط يعرض تكوين رأس المال الثابت الإجمالي للمحافظة المحددة حسب السنة."),
+                ],
             }
         ],
     },
     {
-        "dashboard_ar": "الطاقة والصناعة",
-        "dashboard_en": "Energy and Industry",
+        "dashboard": "الطاقة والصناعة",
         "tabs": [
             {
-                "name_ar": "إنتاج ومبيعات المحروقات",
-                "name_en": "Fuel Production and Sales",
-                "desc_ar": "لوحة تعرض مخططات بيانية لإنتاج ومبيعات المحروقات مع فلاتر للمادة والسنة.",
-                "desc_en": "A dashboard displaying charts for fuel production and sales with filters for material and year.",
+                "name": "إنتاج ومبيعات المحروقات",
+                "desc": "لوحة تعرض مخططات بيانية لإنتاج ومبيعات المحروقات مع فلاتر للمادة والسنة.",
                 "charts": [
-                    ("مبيعات", "Sales", "مخطط يعرض مبيعات المادة المحددة حسب السنة.", "A chart showing sales of the selected material by year."),
-                    ("إنتاج", "Production", "مخطط يعرض إنتاج المادة المحددة حسب السنة.", "A chart showing production of the selected material by year."),
+                    ("مبيعات", "مخطط يعرض مبيعات المادة المحددة حسب السنة."),
+                    ("إنتاج", "مخطط يعرض إنتاج المادة المحددة حسب السنة."),
                 ],
             },
             {
-                "name_ar": "الإنتاج المحلي من الطاقة الجديدة والمتجددة",
-                "name_en": "Local Production of New and Renewable Energy",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لإنتاج الطاقة المتجددة مع فلاتر للسنة ومصدر الطاقة.",
-                "desc_en": "A dashboard displaying a chart for renewable energy production with filters for year and energy source.",
+                "name": "الإنتاج المحلي من الطاقة الجديدة والمتجددة",
+                "desc": "لوحة تعرض مخططاً بيانياً لإنتاج الطاقة المتجددة مع فلاتر للسنة ومصدر الطاقة.",
                 "charts": [
-                    ("كمية الإنتاج المحلي من الطاقة الجديدة والمتجددة", "Local Production Quantity of New and Renewable Energy", "مخطط يعرض كميات الإنتاج المحلي لمصادر الطاقة المتجددة حسب السنة المحددة.", "A chart showing local production quantities of renewable energy sources by the selected year."),
+                    (
+                        "كمية الإنتاج المحلي من الطاقة الجديدة والمتجددة",
+                        "مخطط يعرض كميات الإنتاج المحلي لمصادر الطاقة المتجددة حسب السنة المحددة.",
+                    ),
                 ],
             },
             {
-                "name_ar": "الكميات المستوردة من النفط الخام ومشتقاته",
-                "name_en": "Imported Quantities of Crude Oil and Derivatives",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لكميات استيراد النفط الخام ومشتقاته مع فلاتر للسنة ونوع المشتقات.",
-                "desc_en": "A dashboard displaying a chart for imported crude oil and derivatives with filters for year and derivative type.",
+                "name": "الكميات المستوردة من النفط الخام ومشتقاته",
+                "desc": "لوحة تعرض مخططاً بيانياً لكميات استيراد النفط الخام ومشتقاته مع فلاتر للسنة ونوع المشتقات.",
                 "charts": [
-                    ("الكميات المستوردة من النفط الخام ومشتقاته", "Imported Quantities of Crude Oil and Derivatives", "مخطط يعرض كميات استيراد النفط الخام ومشتقاته حسب السنة ونوع المشتق المحدد.", "A chart showing imported quantities of crude oil and derivatives by year and selected derivative type."),
+                    (
+                        "الكميات المستوردة من النفط الخام ومشتقاته",
+                        "مخطط يعرض كميات استيراد النفط الخام ومشتقاته حسب السنة ونوع المشتق المحدد.",
+                    ),
                 ],
             },
             {
-                "name_ar": "الطاقة الأولية المستهلكة",
-                "name_en": "Primary Energy Consumed",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للطاقة الأولية المستهلكة مع فلاتر لنوع الطاقة والسنة.",
-                "desc_en": "A dashboard displaying a chart for primary energy consumed with filters for energy type and year.",
+                "name": "الطاقة الأولية المستهلكة",
+                "desc": "لوحة تعرض مخططاً بيانياً للطاقة الأولية المستهلكة مع فلاتر لنوع الطاقة والسنة.",
                 "charts": [
-                    ("الطاقة الأولية المستهلكة", "Primary Energy Consumed", "مخطط يعرض كمية الطاقة الأولية المستهلكة حسب نوع الطاقة والسنة المحددة.", "A chart showing primary energy consumed by energy type and selected year."),
+                    (
+                        "الطاقة الأولية المستهلكة",
+                        "مخطط يعرض كمية الطاقة الأولية المستهلكة حسب نوع الطاقة والسنة المحددة.",
+                    ),
                 ],
             },
             {
-                "name_ar": "النتائج الرئيسية للمسح الصناعي",
-                "name_en": "Main Results of the Industrial Survey",
-                "desc_ar": "لوحة تعرض مخططات بيانية لنتائج المسح الصناعي مع فلاتر للنشاط الاقتصادي والسنة.",
-                "desc_en": "A dashboard displaying charts for industrial survey results with filters for economic activity and year.",
+                "name": "النتائج الرئيسية للمسح الصناعي",
+                "desc": "لوحة تعرض مخططات بيانية لنتائج المسح الصناعي مع فلاتر للنشاط الاقتصادي والسنة.",
                 "charts": [
-                    ("الإنتاج القائم", "Gross Output", "مخطط يعرض الإنتاج القائم للنشاط الاقتصادي المحدد حسب السنة.", "A chart showing gross output for the selected economic activity by year."),
-                    ("الاستهلاك الوسيط", "Intermediate Consumption", "مخطط يعرض الاستهلاك الوسيط للنشاط الاقتصادي المحدد حسب السنة.", "A chart showing intermediate consumption for the selected economic activity by year."),
-                    ("القيمة المضافة الإجمالية", "Gross Value Added", "مخطط يعرض القيمة المضافة الإجمالية للنشاط الاقتصادي المحدد حسب السنة.", "A chart showing gross value added for the selected economic activity by year."),
-                    ("الاهتلاك", "Depreciation", "مخطط يعرض الاهتلاك للنشاط الاقتصادي المحدد حسب السنة.", "A chart showing depreciation for the selected economic activity by year."),
-                    ("الضرائب على الإنتاج", "Taxes on Production", "مخطط يعرض الضرائب على الإنتاج للنشاط الاقتصادي المحدد حسب السنة.", "A chart showing taxes on production for the selected economic activity by year."),
-                    ("تكوين رأس المال الثابت الإجمالي", "Gross Fixed Capital Formation", "مخطط يعرض تكوين رأس المال الثابت الإجمالي للنشاط الاقتصادي المحدد حسب السنة.", "A chart showing gross fixed capital formation for the selected economic activity by year."),
-                    ("تعويضات العاملين", "Employee Compensation", "مخطط يعرض تعويضات العاملين للنشاط الاقتصادي المحدد حسب السنة.", "A chart showing employee compensation for the selected economic activity by year."),
+                    ("الإنتاج القائم", "مخطط يعرض الإنتاج القائم للنشاط الاقتصادي المحدد حسب السنة."),
+                    ("الاستهلاك الوسيط", "مخطط يعرض الاستهلاك الوسيط للنشاط الاقتصادي المحدد حسب السنة."),
+                    ("القيمة المضافة الإجمالية", "مخطط يعرض القيمة المضافة الإجمالية للنشاط الاقتصادي المحدد حسب السنة."),
+                    ("الاهتلاك", "مخطط يعرض الاهتلاك للنشاط الاقتصادي المحدد حسب السنة."),
+                    ("الضرائب على الإنتاج", "مخطط يعرض الضرائب على الإنتاج للنشاط الاقتصادي المحدد حسب السنة."),
+                    ("تكوين رأس المال الثابت الإجمالي", "مخطط يعرض تكوين رأس المال الثابت الإجمالي للنشاط الاقتصادي المحدد حسب السنة."),
+                    ("تعويضات العاملين", "مخطط يعرض تعويضات العاملين للنشاط الاقتصادي المحدد حسب السنة."),
                 ],
             },
         ],
     },
     {
-        "dashboard_ar": "الكهرباء",
-        "dashboard_en": "Electricity",
+        "dashboard": "الكهرباء",
         "tabs": [
             {
-                "name_ar": "الكهرباء – معلومات عامة",
-                "name_en": "Electricity – General Information",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لبيانات الطاقة الكهربائية مع فلاتر للبند والسنة.",
-                "desc_en": "A dashboard displaying a chart for electricity data with filters for item and year.",
+                "name": "الكهرباء – معلومات عامة",
+                "desc": "لوحة تعرض مخططاً بيانياً لبيانات الطاقة الكهربائية مع فلاتر للبند والسنة.",
                 "charts": [
-                    ("بيانات عامة عن الطاقة الكهربائية", "General Electricity Data", "مخطط يعرض بيانات الطاقة الكهربائية للبند المحدد حسب السنة.", "A chart showing electricity data for the selected item by year."),
+                    ("بيانات عامة عن الطاقة الكهربائية", "مخطط يعرض بيانات الطاقة الكهربائية للبند المحدد حسب السنة."),
                 ],
             },
             {
-                "name_ar": "الكهرباء – تفصيلية",
-                "name_en": "Electricity – Detailed",
-                "desc_ar": "لوحة تعرض مخططات بيانية تفصيلية للطاقة الكهربائية مع فلتر للسنة.",
-                "desc_en": "A dashboard displaying detailed electricity charts with a filter for year.",
+                "name": "الكهرباء – تفصيلية",
+                "desc": "لوحة تعرض مخططات بيانية تفصيلية للطاقة الكهربائية مع فلتر للسنة.",
                 "charts": [
-                    ("مصدر توليد الطاقة", "Power Generation Source", "مخطط يعرض إنتاج الطاقة حسب مصادر التوليد والسنة المحددة.", "A chart showing energy production by generation sources and selected year."),
-                    ("الحمل الأقصى", "Maximum Load", "مخطط يعرض الحمل الأقصى للطاقة الكهربائية حسب السنة المحددة.", "A chart showing maximum electricity load by selected year."),
-                    ("الصناعات الكبرى", "Major Industries", "مخطط يعرض بيانات الطاقة الكهربائية لقطاع الصناعات الكبرى حسب السنة المحددة.", "A chart showing electricity data for the major industries sector by selected year."),
+                    ("مصدر توليد الطاقة", "مخطط يعرض إنتاج الطاقة حسب مصادر التوليد والسنة المحددة."),
+                    ("الحمل الأقصى", "مخطط يعرض الحمل الأقصى للطاقة الكهربائية حسب السنة المحددة."),
+                    ("الصناعات الكبرى", "مخطط يعرض بيانات الطاقة الكهربائية لقطاع الصناعات الكبرى حسب السنة المحددة."),
                 ],
             },
             {
-                "name_ar": "استهلاك المملكة من الوقود",
-                "name_en": "Kingdom Fuel Consumption",
-                "desc_ar": "لوحة تعرض مخططات بيانية لاستهلاك الوقود والكهرباء مع فلاتر جانبية.",
-                "desc_en": "A dashboard displaying charts for fuel and electricity consumption with side filters.",
+                "name": "استهلاك المملكة من الوقود",
+                "desc": "لوحة تعرض مخططات بيانية لاستهلاك الوقود والكهرباء مع فلاتر جانبية.",
                 "charts": [
-                    ("نصيب الفرد من الوقود", "Per Capita Fuel Consumption", "مخطط يعرض نصيب الفرد من استهلاك الوقود عبر السنوات.", "A chart showing per capita fuel consumption across years."),
-                    ("استهلاك المملكة من الوقود", "Kingdom Fuel Consumption", "مخطط يعرض إجمالي استهلاك المملكة من الوقود عبر السنوات.", "A chart showing total kingdom fuel consumption across years."),
-                    ("نسبة استهلاك قطاع الكهرباء من الاستهلاك الكلي", "Electricity Sector Share of Total Consumption", "مخطط يعرض نسبة استهلاك قطاع الكهرباء من إجمالي الاستهلاك عبر السنوات.", "A chart showing the electricity sector's share of total consumption across years."),
-                    ("استهلاك قطاع الكهرباء", "Electricity Sector Consumption", "مخطط يعرض استهلاك قطاع الكهرباء من الوقود عبر السنوات.", "A chart showing electricity sector fuel consumption across years."),
+                    ("نصيب الفرد من الوقود", "مخطط يعرض نصيب الفرد من استهلاك الوقود عبر السنوات."),
+                    ("استهلاك المملكة من الوقود", "مخطط يعرض إجمالي استهلاك المملكة من الوقود عبر السنوات."),
+                    ("نسبة استهلاك قطاع الكهرباء من الاستهلاك الكلي", "مخطط يعرض نسبة استهلاك قطاع الكهرباء من إجمالي الاستهلاك عبر السنوات."),
+                    ("استهلاك قطاع الكهرباء", "مخطط يعرض استهلاك قطاع الكهرباء من الوقود عبر السنوات."),
                 ],
             },
             {
-                "name_ar": "أعداد المشتركين بالتيار الكهربائي حسب المصدر",
-                "name_en": "Electricity Subscribers by Source",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لأعداد المشتركين بالتيار الكهربائي مع فلاتر للمصدر والسنة.",
-                "desc_en": "A dashboard displaying a chart for electricity subscribers with filters for source and year.",
+                "name": "أعداد المشتركين بالتيار الكهربائي حسب المصدر",
+                "desc": "لوحة تعرض مخططاً بيانياً لأعداد المشتركين بالتيار الكهربائي مع فلاتر للمصدر والسنة.",
                 "charts": [
-                    ("أعداد المشتركين في التيار الكهربائي", "Electricity Subscribers", "مخطط يعرض أعداد المشتركين حسب مصدر التزويد والسنة المحددة.", "A chart showing subscriber counts by supply source and selected year."),
+                    ("أعداد المشتركين في التيار الكهربائي", "مخطط يعرض أعداد المشتركين حسب مصدر التزويد والسنة المحددة."),
                 ],
             },
             {
-                "name_ar": "الطاقة الكهربائية حسب الاستخدام",
-                "name_en": "Electricity by Use",
-                "desc_ar": "لوحة تعرض مخططات بيانية للطاقة الكهربائية حسب الاستخدام مع فلاتر للسنة ونوع الاستخدام.",
-                "desc_en": "A dashboard displaying charts for electricity by use with filters for year and use type.",
+                "name": "الطاقة الكهربائية حسب الاستخدام",
+                "desc": "لوحة تعرض مخططات بيانية للطاقة الكهربائية حسب الاستخدام مع فلاتر للسنة ونوع الاستخدام.",
                 "charts": [
-                    ("كمية الطاقة الكهربائية", "Electricity Quantity", "مخطط يعرض كمية الطاقة الكهربائية حسب نوع الاستخدام والسنة المحددة.", "A chart showing electricity quantity by use type and selected year."),
-                    ("النسبة إلى الإجمالي", "Share of Total", "مخطط يعرض نسبة كل نوع استخدام إلى إجمالي الاستهلاك حسب السنة المحددة.", "A chart showing each use type's share of total consumption by selected year."),
+                    ("كمية الطاقة الكهربائية", "مخطط يعرض كمية الطاقة الكهربائية حسب نوع الاستخدام والسنة المحددة."),
+                    ("النسبة إلى الإجمالي", "مخطط يعرض نسبة كل نوع استخدام إلى إجمالي الاستهلاك حسب السنة المحددة."),
                 ],
             },
         ],
     },
     {
-        "dashboard_ar": "العمل والأجور",
-        "dashboard_en": "Labor and Wages",
+        "dashboard": "العمل والأجور",
         "tabs": [
             {
-                "name_ar": "حسب الجنس والمستوى التعليمي",
-                "name_en": "By Gender and Educational Level",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للعاملين في القطاع العام مع فلاتر للسنة والمستوى التعليمي والجنس.",
-                "desc_en": "A dashboard displaying a chart for public sector workers with filters for year, educational level, and gender.",
-                "charts": [],
-            },
-            {
-                "name_ar": "توزيع العاملين في القطاعين العام والخاص",
-                "name_en": "Workers Distribution in Public and Private Sectors",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لتوزيع العاملين في القطاعين العام والخاص مع فلاتر للسنة والنشاط الاقتصادي والجنس.",
-                "desc_en": "A dashboard displaying a chart for worker distribution in public and private sectors with filters for year, economic activity, and gender.",
-                "charts": [],
-            },
-            {
-                "name_ar": "حسب الإقليم والجنسية",
-                "name_en": "By Region and Nationality",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للعاملين في منشآت القطاعين العام والخاص مع فلاتر للسنة والإقليم والجنسية.",
-                "desc_en": "A dashboard displaying a chart for workers in public and private establishments with filters for year, region, and nationality.",
-                "charts": [],
-            },
-            {
-                "name_ar": "حسب النشاط الاقتصادي والجنس",
-                "name_en": "By Economic Activity and Gender",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للعاملين في منشآت القطاعين العام والخاص مع فلاتر للسنة والنشاط الاقتصادي والجنس.",
-                "desc_en": "A dashboard displaying a chart for workers in public and private establishments with filters for year, economic activity, and gender.",
-                "charts": [],
-            },
-            {
-                "name_ar": "حسب الجنسية والجنس",
-                "name_en": "By Nationality and Gender",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للعاملين في منشآت القطاعين العام والخاص مع فلاتر للسنة والجنسية والجنس.",
-                "desc_en": "A dashboard displaying a chart for workers in public and private establishments with filters for year, nationality, and gender.",
-                "charts": [],
-            },
-            {
-                "name_ar": "العاملون بأجر – منشآت القطاعين",
-                "name_en": "Wage Earners – Public and Private Establishments",
-                "desc_ar": "لوحة تعرض مخططات بيانية للعاملين بأجر وأجورهم وساعات عملهم مع فلاتر للسنة والمهنة والجنس.",
-                "desc_en": "A dashboard displaying charts for wage earners, wages, and working hours with filters for year, occupation, and gender.",
-                "charts": [],
-            },
-            {
-                "name_ar": "العاملون بأجر – منشآت القطاع العام",
-                "name_en": "Wage Earners – Public Sector Establishments",
-                "desc_ar": "لوحة تعرض مخططات بيانية للعاملين بأجر في منشآت القطاع العام مع فلاتر للسنة والمهنة والجنس.",
-                "desc_en": "A dashboard displaying charts for wage earners in public sector establishments with filters for year, occupation, and gender.",
-                "charts": [],
-            },
-            {
-                "name_ar": "العاملون بأجر – منشآت القطاع الخاص",
-                "name_en": "Wage Earners – Private Sector Establishments",
-                "desc_ar": "لوحة تعرض مخططات بيانية للعاملين بأجر في منشآت القطاع الخاص مع فلاتر للسنة والمهنة والجنس.",
-                "desc_en": "A dashboard displaying charts for wage earners in private sector establishments with filters for year, occupation, and gender.",
-                "charts": [],
-            },
-            {
-                "name_ar": "عدد العاملين – القطاع العام",
-                "name_en": "Number of Workers – Public Sector",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للعاملين في القطاع العام مع فلاتر للسنة والمهنة والجنسية.",
-                "desc_en": "A dashboard displaying a chart for public sector workers with filters for year, occupation, and nationality.",
-                "charts": [],
-            },
-            {
-                "name_ar": "عدد العاملين – القطاع الخاص",
-                "name_en": "Number of Workers – Private Sector",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لعدد العاملين في القطاع الخاص مع فلاتر للسنة والمهنة والجنسية.",
-                "desc_en": "A dashboard displaying a chart for private sector workers with filters for year, occupation, and nationality.",
-                "charts": [],
-            },
-        ],
-    },
-    {
-        "dashboard_ar": "المعلومات والاتصالات",
-        "dashboard_en": "Information and Communications",
-        "tabs": [
-            {
-                "name_ar": "أعداد المشتركين في خدمات الهواتف الثابتة والخلوية",
-                "name_en": "Fixed and Mobile Phone Service Subscribers",
-                "desc_ar": "لوحة تعرض مخططات بيانية لأعداد المشتركين في خدمات الاتصالات مع فلتر للسنة.",
-                "desc_en": "A dashboard displaying charts for communication service subscribers with a filter for year.",
-                "charts": [],
-            },
-            {
-                "name_ar": "توزيع الأسر حسب مؤشرات تكنولوجيا المعلومات",
-                "name_en": "Household Distribution by ICT Indicators",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لتوزيع الأسر حسب مؤشرات تكنولوجيا المعلومات مع فلاتر للمؤشر والسنة.",
-                "desc_en": "A dashboard displaying a chart for household distribution by ICT indicators with filters for indicator and year.",
-                "charts": [],
-            },
-            {
-                "name_ar": "التوزيع النسبي للأفراد حسب استخدام الحاسوب",
-                "name_en": "Relative Distribution of Individuals by Computer Use",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للتوزيع النسبي لاستخدام الحاسوب مع فلاتر للسنة والجنس والعمر ونوع الاستخدام.",
-                "desc_en": "A dashboard displaying a chart for relative computer use distribution with filters for year, gender, age, and use type.",
-                "charts": [],
-            },
-            {
-                "name_ar": "التوزيع النسبي للأفراد حسب استخدام الإنترنت",
-                "name_en": "Relative Distribution of Individuals by Internet Use",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للتوزيع النسبي لاستخدام الإنترنت مع فلاتر للسنة والجنس والعمر ونوع الاستخدام.",
-                "desc_en": "A dashboard displaying a chart for relative internet use distribution with filters for year, gender, age, and use type.",
+                "name": "حسب الجنس والمستوى التعليمي",
+                "desc": "لوحة تعرض مخططاً بيانياً للعاملين في القطاع العام مع فلاتر للسنة والمستوى التعليمي والجنس.",
                 "charts": [
-                    ("التوزيع النسبي للأفراد حسب استخدام الإنترنت", "Relative Distribution by Internet Use", "مخطط يعرض التوزيع النسبي لاستخدام الإنترنت حسب الجنس والفئة العمرية ونوع الاستخدام والسنة المحددة.", "A chart showing relative internet use distribution by gender, age group, use type, and selected year."),
+                    (
+                        "العاملون في القطاع العام حسب المستوى التعليمي والجنس",
+                        "مخطط يعرض العاملين في القطاع العام حسب المستوى التعليمي والجنس والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "توزيع العاملين في القطاعين العام والخاص",
+                "desc": "لوحة تعرض مخططاً بيانياً لتوزيع العاملين في القطاعين العام والخاص مع فلاتر للسنة والنشاط الاقتصادي والجنس.",
+                "charts": [
+                    (
+                        "توزيع العاملين في القطاعين العام والخاص",
+                        "مخطط يعرض توزيع العاملين في القطاعين العام والخاص حسب الفلاتر المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "حسب الإقليم والجنسية",
+                "desc": "لوحة تعرض مخططاً بيانياً للعاملين في منشآت القطاعين العام والخاص مع فلاتر للسنة والإقليم والجنسية.",
+                "charts": [
+                    (
+                        "العاملون في منشآت القطاعين العام والخاص حسب الإقليم والجنسية",
+                        "مخطط يعرض العاملين في منشآت القطاعين العام والخاص حسب الإقليم والجنسية والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "حسب النشاط الاقتصادي والجنس",
+                "desc": "لوحة تعرض مخططاً بيانياً للعاملين في منشآت القطاعين العام والخاص مع فلاتر للسنة والنشاط الاقتصادي والجنس.",
+                "charts": [
+                    (
+                        "العاملون في منشآت القطاعين العام والخاص حسب النشاط الاقتصادي والجنس",
+                        "مخطط يعرض العاملين في منشآت القطاعين العام والخاص حسب النشاط الاقتصادي والجنس والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "حسب الجنسية والجنس",
+                "desc": "لوحة تعرض مخططاً بيانياً للعاملين في منشآت القطاعين العام والخاص مع فلاتر للسنة والجنسية والجنس.",
+                "charts": [
+                    (
+                        "العاملون في منشآت القطاعين العام والخاص حسب الجنسية والجنس",
+                        "مخطط يعرض العاملين في منشآت القطاعين العام والخاص حسب الجنسية والجنس والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "العاملون بأجر – منشآت القطاعين",
+                "desc": "لوحة تعرض مخططات بيانية للعاملين بأجر وأجورهم وساعات عملهم مع فلاتر للسنة والمهنة والجنس.",
+                "charts": [
+                    (
+                        "العاملون بأجر في المنشآت",
+                        "مخطط يعرض العاملين بأجر في المنشآت حسب المجموعات الرئيسية للمهن والجنس والسنة المحددة.",
+                    ),
+                    (
+                        "متوسط ساعات العمل الشهري",
+                        "مخطط يعرض متوسط ساعات العمل الشهري للعامل الواحد حسب الفلاتر المحددة.",
+                    ),
+                    (
+                        "متوسط الدخل الشهري",
+                        "مخطط يعرض متوسط الدخل الشهري للعامل الواحد حسب الفلاتر المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "العاملون بأجر – منشآت القطاع العام",
+                "desc": "لوحة تعرض مخططات بيانية للعاملين بأجر في منشآت القطاع العام مع فلاتر للسنة والمهنة والجنس.",
+                "charts": [
+                    (
+                        "العاملون بأجر في منشآت القطاع العام",
+                        "مخطط يعرض العاملين بأجر في منشآت القطاع العام حسب المهنة والجنس والسنة المحددة.",
+                    ),
+                    (
+                        "متوسط ساعات العمل الشهري",
+                        "مخطط يعرض متوسط ساعات العمل الشهري للعامل في القطاع العام حسب الفلاتر المحددة.",
+                    ),
+                    (
+                        "متوسط الدخل الشهري",
+                        "مخطط يعرض متوسط الدخل الشهري للعامل في القطاع العام حسب الفلاتر المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "العاملون بأجر – منشآت القطاع الخاص",
+                "desc": "لوحة تعرض مخططات بيانية للعاملين بأجر في منشآت القطاع الخاص مع فلاتر للسنة والمهنة والجنس.",
+                "charts": [
+                    (
+                        "العاملون بأجر في منشآت القطاع الخاص",
+                        "مخطط يعرض العاملين بأجر في منشآت القطاع الخاص حسب المهنة والجنس والسنة المحددة.",
+                    ),
+                    (
+                        "متوسط ساعات العمل الشهري",
+                        "مخطط يعرض متوسط ساعات العمل الشهري للعامل في القطاع الخاص حسب الفلاتر المحددة.",
+                    ),
+                    (
+                        "متوسط الدخل الشهري",
+                        "مخطط يعرض متوسط الدخل الشهري للعامل في القطاع الخاص حسب الفلاتر المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "عدد العاملين – القطاع العام",
+                "desc": "لوحة تعرض مخططاً بيانياً للعاملين في القطاع العام مع فلاتر للسنة والمهنة والجنسية.",
+                "charts": [
+                    (
+                        "عدد العاملين في القطاع العام",
+                        "مخطط يعرض عدد العاملين في القطاع العام حسب المهنة والجنسية والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "عدد العاملين – القطاع الخاص",
+                "desc": "لوحة تعرض مخططاً بيانياً لعدد العاملين في القطاع الخاص مع فلاتر للسنة والمهنة والجنسية.",
+                "charts": [
+                    (
+                        "عدد العاملين في القطاع الخاص",
+                        "مخطط يعرض عدد العاملين في القطاع الخاص حسب المهنة والجنسية والسنة المحددة.",
+                    ),
                 ],
             },
         ],
     },
     {
-        "dashboard_ar": "حوادث الطرق",
-        "dashboard_en": "Road Accidents",
+        "dashboard": "المعلومات والاتصالات",
         "tabs": [
             {
-                "name_ar": "أخطاء السائقين المشتركين في حوادث الطرق",
-                "name_en": "Driver Errors in Road Accidents",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لأخطاء السائقين في حوادث الطرق مع فلاتر للسنة ونوع الخطأ.",
-                "desc_en": "A dashboard displaying a chart for driver errors in road accidents with filters for year and error type.",
-                "charts": [],
+                "name": "أعداد المشتركين في خدمات الهواتف الثابتة والخلوية",
+                "desc": "لوحة تعرض مخططات بيانية لأعداد المشتركين في خدمات الاتصالات مع فلتر للسنة.",
+                "charts": [
+                    ("عدد المشتركين في خدمة الهواتف الثابتة", "مخطط يعرض عدد المشتركين في خدمة الهواتف الثابتة حسب السنة."),
+                    ("عدد المشتركين في خدمة الهواتف الخلوية", "مخطط يعرض عدد المشتركين في خدمة الهواتف الخلوية حسب السنة."),
+                    ("عدد المشتركين في خدمة الإنترنت الثابت", "مخطط يعرض عدد المشتركين في خدمة الإنترنت الثابت حسب السنة."),
+                ],
             },
             {
-                "name_ar": "المركبات المشتركة في حوادث الطرق",
-                "name_en": "Vehicles Involved in Road Accidents",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للمركبات المشتركة في حوادث الطرق مع فلاتر للسنة والشهر ونوع المركبة.",
-                "desc_en": "A dashboard displaying a chart for vehicles involved in road accidents with filters for year, month, and vehicle type.",
-                "charts": [],
+                "name": "توزيع الأسر حسب مؤشرات تكنولوجيا المعلومات",
+                "desc": "لوحة تعرض مخططاً بيانياً لتوزيع الأسر حسب مؤشرات تكنولوجيا المعلومات مع فلاتر للمؤشر والسنة.",
+                "charts": [
+                    (
+                        "توزيع الأسر حسب مؤشرات تكنولوجيا المعلومات والاتصالات",
+                        "مخطط يعرض توزيع الأسر حسب مؤشرات تكنولوجيا المعلومات والاتصالات والسنة المحددة.",
+                    ),
+                ],
             },
             {
-                "name_ar": "حوادث الطرق حسب نوع الحادث والمتضررين",
-                "name_en": "Road Accidents by Accident Type and Affected Persons",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لحوادث الطرق مع فلاتر للسنة والمتضررين.",
-                "desc_en": "A dashboard displaying a chart for road accidents with filters for year and affected persons.",
-                "charts": [],
+                "name": "التوزيع النسبي للأفراد حسب استخدام الحاسوب",
+                "desc": "لوحة تعرض مخططاً بيانياً للتوزيع النسبي لاستخدام الحاسوب مع فلاتر للسنة والجنس والعمر ونوع الاستخدام.",
+                "charts": [
+                    (
+                        "التوزيع النسبي للأفراد حسب استخدام الحاسوب",
+                        "مخطط يعرض التوزيع النسبي لاستخدام الحاسوب حسب الجنس والفئة العمرية ونوع الاستخدام والسنة المحددة.",
+                    ),
+                ],
             },
             {
-                "name_ar": "حوادث الطرق حسب المحافظة ونوع الحادث",
-                "name_en": "Road Accidents by Governorate and Accident Type",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لحوادث الطرق مع فلاتر للسنة والمحافظة ونوع الحادث.",
-                "desc_en": "A dashboard displaying a chart for road accidents with filters for year, governorate, and accident type.",
-                "charts": [],
-            },
-            {
-                "name_ar": "حوادث الطرق حسب الشهر ونوع الحادث",
-                "name_en": "Road Accidents by Month and Accident Type",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً لحوادث الطرق مع فلاتر للسنة والشهر ونوع الحادث.",
-                "desc_en": "A dashboard displaying a chart for road accidents with filters for year, month, and accident type.",
-                "charts": [],
-            },
-            {
-                "name_ar": "المصابين في حوادث الطرق حسب المصاب",
-                "name_en": "Injured in Road Accidents by Injured Person Type",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للمصابين في حوادث الطرق مع فلاتر للسنة ونوع المصاب.",
-                "desc_en": "A dashboard displaying a chart for injured persons in road accidents with filters for year and injured person type.",
-                "charts": [],
-            },
-            {
-                "name_ar": "المصابين في حوادث الطرق حسب درجة الإصابة",
-                "name_en": "Injured in Road Accidents by Injury Degree",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للمصابين في حوادث الطرق مع فلاتر للسنة ودرجة الإصابة.",
-                "desc_en": "A dashboard displaying a chart for injured persons in road accidents with filters for year and injury degree.",
-                "charts": [],
+                "name": "التوزيع النسبي للأفراد حسب استخدام الإنترنت",
+                "desc": "لوحة تعرض مخططاً بيانياً للتوزيع النسبي لاستخدام الإنترنت مع فلاتر للسنة والجنس والعمر ونوع الاستخدام.",
+                "charts": [
+                    (
+                        "التوزيع النسبي للأفراد حسب استخدام الإنترنت",
+                        "مخطط يعرض التوزيع النسبي لاستخدام الإنترنت حسب الجنس والفئة العمرية ونوع الاستخدام والسنة المحددة.",
+                    ),
+                ],
             },
         ],
     },
     {
-        "dashboard_ar": "الثقافة والإعلام",
-        "dashboard_en": "Culture and Media",
+        "dashboard": "حوادث الطرق",
         "tabs": [
             {
-                "name_ar": "النشاطات الثقافية",
-                "name_en": "Cultural Activities",
-                "desc_ar": "لوحة تعرض مخططاً بيانياً للنشاطات الثقافية مع فلاتر لنوع النشاط والسنة.",
-                "desc_en": "A dashboard displaying a chart for cultural activities with filters for activity type and year.",
-                "charts": [],
+                "name": "أخطاء السائقين المشتركين في حوادث الطرق",
+                "desc": "لوحة تعرض مخططاً بيانياً لأخطاء السائقين في حوادث الطرق مع فلاتر للسنة ونوع الخطأ.",
+                "charts": [
+                    (
+                        "عدد أخطاء السائقين المشتركين بحوادث الطرق حسب نوع الخطأ",
+                        "مخطط يعرض أخطاء السائقين في حوادث الطرق حسب نوع الخطأ والسنة المحددة.",
+                    ),
+                ],
             },
             {
-                "name_ar": "المطابع ودور النشر والتوزيع",
-                "name_en": "Printing Presses and Publishing Houses",
-                "desc_ar": "لوحة تعرض مخططات بيانية للمطابع ودور النشر والتوزيع مع فلاتر للمحافظة والسنة.",
-                "desc_en": "A dashboard displaying charts for printing presses and publishing houses with filters for governorate and year.",
-                "charts": [],
+                "name": "المركبات المشتركة في حوادث الطرق",
+                "desc": "لوحة تعرض مخططاً بيانياً للمركبات المشتركة في حوادث الطرق مع فلاتر للسنة والشهر ونوع المركبة.",
+                "charts": [
+                    (
+                        "عدد المركبات المشتركة في حوادث الطرق حسب الشهر ونوع المركبة",
+                        "مخطط يعرض المركبات المشتركة في حوادث الطرق حسب الشهر ونوع المركبة والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "حوادث الطرق حسب نوع الحادث والمتضررين",
+                "desc": "لوحة تعرض مخططاً بيانياً لحوادث الطرق مع فلاتر للسنة والمتضررين.",
+                "charts": [
+                    (
+                        "عدد حوادث الطرق حسب عدد المتضررين",
+                        "مخطط يعرض حوادث الطرق حسب نوع المتضررين والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "حوادث الطرق حسب المحافظة ونوع الحادث",
+                "desc": "لوحة تعرض مخططاً بيانياً لحوادث الطرق مع فلاتر للسنة والمحافظة ونوع الحادث.",
+                "charts": [
+                    (
+                        "عدد حوادث الطرق حسب المحافظة ونوع الحادث",
+                        "مخطط يعرض حوادث الطرق حسب المحافظة ونوع الحادث والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "حوادث الطرق حسب الشهر ونوع الحادث",
+                "desc": "لوحة تعرض مخططاً بيانياً لحوادث الطرق مع فلاتر للسنة والشهر ونوع الحادث.",
+                "charts": [
+                    (
+                        "عدد حوادث الطرق حسب الشهر ونوع الحادث",
+                        "مخطط يعرض حوادث الطرق حسب الشهر ونوع الحادث والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "المصابين في حوادث الطرق حسب المصاب",
+                "desc": "لوحة تعرض مخططاً بيانياً للمصابين في حوادث الطرق مع فلاتر للسنة ونوع المصاب.",
+                "charts": [
+                    (
+                        "عدد المصابين في حوادث الطرق حسب المصاب",
+                        "مخطط يعرض المصابين في حوادث الطرق حسب نوع المصاب والسنة المحددة.",
+                    ),
+                ],
+            },
+            {
+                "name": "المصابين في حوادث الطرق حسب درجة الإصابة",
+                "desc": "لوحة تعرض مخططاً بيانياً للمصابين في حوادث الطرق مع فلاتر للسنة ودرجة الإصابة.",
+                "charts": [
+                    (
+                        "عدد المصابين في حوادث الطرق حسب درجة الإصابة",
+                        "مخطط يعرض المصابين في حوادث الطرق حسب درجة الإصابة والسنة المحددة.",
+                    ),
+                ],
+            },
+        ],
+    },
+    {
+        "dashboard": "الثقافة والإعلام",
+        "tabs": [
+            {
+                "name": "النشاطات الثقافية",
+                "desc": "لوحة تعرض مخططاً بيانياً للنشاطات الثقافية مع فلاتر لنوع النشاط والسنة.",
+                "charts": [
+                    ("النشاطات الثقافية", "مخطط يعرض النشاطات الثقافية حسب نوع النشاط والسنة المحددة."),
+                ],
+            },
+            {
+                "name": "المطابع ودور النشر والتوزيع",
+                "desc": "لوحة تعرض مخططات بيانية للمطابع ودور النشر والتوزيع مع فلاتر للمحافظة والسنة.",
+                "charts": [
+                    ("عدد المطابع", "مخطط يعرض عدد المطابع حسب المحافظة والسنة المحددة."),
+                    ("دور النشر والتوزيع", "مخطط يعرض دور النشر والتوزيع حسب المحافظة والسنة المحددة."),
+                    ("دور الدعاية والإعلان", "مخطط يعرض دور الدعاية والإعلان حسب المحافظة والسنة المحددة."),
+                    ("دور الترجمة", "مخطط يعرض دور الترجمة حسب المحافظة والسنة المحددة."),
+                    ("مراكز الدراسات والأبحاث", "مخطط يعرض مراكز الدراسات والأبحاث حسب المحافظة والسنة المحددة."),
+                    ("مراكز قياس الرأي العام", "مخطط يعرض مراكز قياس الرأي العام حسب المحافظة والسنة المحددة."),
+                ],
             },
         ],
     },
@@ -342,119 +427,89 @@ def set_paragraph_rtl(paragraph, rtl: bool = True) -> None:
     p_pr.append(bidi)
 
 
-def add_styled_run(paragraph, text: str, bold: bool = False, size: int = 11, rtl: bool = False, color=None):
+def add_run(paragraph, text: str, bold: bool = False, size: int = 11, color=None):
     run = paragraph.add_run(text)
     run.bold = bold
     run.font.size = Pt(size)
     if color:
         run.font.color.rgb = color
-    if rtl:
-        r_pr = run._r.get_or_add_rPr()
-        rtl_el = OxmlElement("w:rtl")
-        rtl_el.set(qn("w:val"), "1")
-        r_pr.append(rtl_el)
+    r_pr = run._r.get_or_add_rPr()
+    rtl_el = OxmlElement("w:rtl")
+    rtl_el.set(qn("w:val"), "1")
+    r_pr.append(rtl_el)
     return run
+
+
+def add_rtl_paragraph(doc, text: str = "", bold: bool = False, size: int = 11, color=None, align=None):
+    p = doc.add_paragraph()
+    set_paragraph_rtl(p, True)
+    if align is not None:
+        p.alignment = align
+    if text:
+        add_run(p, text, bold=bold, size=size, color=color)
+    return p
 
 
 def build_document() -> Document:
     doc = Document()
-
     for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    title = doc.add_paragraph()
-    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    add_styled_run(title, "أوصاف لوحات المعلومات", bold=True, size=18, rtl=True)
-    title.add_run("\n")
-    add_styled_run(title, "Dashboard Descriptions", bold=True, size=16)
-
-    subtitle = doc.add_paragraph()
-    subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    add_styled_run(subtitle, "وصف التبويبات والمخططات – عربي / إنجليزي", size=11, rtl=True, color=RGBColor(80, 80, 80))
-    subtitle.add_run("\n")
-    add_styled_run(subtitle, "Tab and Chart Descriptions – Arabic / English", size=11, color=RGBColor(80, 80, 80))
+    title = add_rtl_paragraph(doc, "أوصاف لوحات المعلومات", bold=True, size=18, align=WD_ALIGN_PARAGRAPH.CENTER)
+    add_run(title, "\n", size=18)
+    add_run(title, "وصف التبويبات والمخططات", size=12, color=RGBColor(90, 90, 90))
 
     doc.add_paragraph()
 
     for section in SECTIONS:
-        heading = doc.add_paragraph()
-        set_paragraph_rtl(heading, True)
-        add_styled_run(heading, section["dashboard_ar"], bold=True, size=14, rtl=True, color=RGBColor(0, 102, 102))
-        heading.add_run("  |  ")
-        add_styled_run(heading, section["dashboard_en"], bold=True, size=14, color=RGBColor(0, 102, 102))
+        heading = add_rtl_paragraph(doc, section["dashboard"], bold=True, size=14, color=RGBColor(0, 102, 102))
 
         for tab in section["tabs"]:
-            tab_heading = doc.add_paragraph()
-            set_paragraph_rtl(tab_heading, True)
-            add_styled_run(tab_heading, "التبويب: ", bold=True, size=12, rtl=True)
-            add_styled_run(tab_heading, tab["name_ar"], bold=True, size=12, rtl=True)
-            tab_heading.add_run("\n")
-            add_styled_run(tab_heading, "Tab: ", bold=True, size=12)
-            add_styled_run(tab_heading, tab["name_en"], bold=True, size=12)
-
-            table = doc.add_table(rows=2, cols=2)
+            table = doc.add_table(rows=4, cols=1)
             table.style = "Table Grid"
             table.autofit = False
-            for col in table.columns:
-                col.width = Inches(3.1)
+            table.columns[0].width = Inches(6.2)
 
-            headers = [("وصف التبويب (عربي)", True), ("Tab Description (English)", False)]
-            for i, (header, rtl) in enumerate(headers):
-                cell = table.rows[0].cells[i]
-                set_cell_shading(cell, "E6F2F2")
-                p = cell.paragraphs[0]
-                if rtl:
-                    set_paragraph_rtl(p, True)
-                add_styled_run(p, header, bold=True, size=10, rtl=rtl)
+            # Tab name row
+            name_cell = table.rows[0].cells[0]
+            set_cell_shading(name_cell, "D9EEEE")
+            p = name_cell.paragraphs[0]
+            set_paragraph_rtl(p, True)
+            add_run(p, "اسم التبويب: ", bold=True, size=11)
+            add_run(p, tab["name"], bold=True, size=11)
 
-            desc_cells = [(tab["desc_ar"], True), (tab["desc_en"], False)]
-            for i, (text, rtl) in enumerate(desc_cells):
-                cell = table.rows[1].cells[i]
-                p = cell.paragraphs[0]
-                if rtl:
-                    set_paragraph_rtl(p, True)
-                add_styled_run(p, text, size=10, rtl=rtl)
+            # Tab prompt row
+            prompt_cell = table.rows[1].cells[0]
+            set_cell_shading(prompt_cell, "F2F8F8")
+            p = prompt_cell.paragraphs[0]
+            set_paragraph_rtl(p, True)
+            add_run(p, TAB_PROMPT, bold=True, size=10, color=RGBColor(0, 102, 102))
+
+            # Tab description row
+            desc_cell = table.rows[2].cells[0]
+            p = desc_cell.paragraphs[0]
+            set_paragraph_rtl(p, True)
+            add_run(p, tab["desc"], size=11)
+
+            # Charts row
+            charts_cell = table.rows[3].cells[0]
+            p = charts_cell.paragraphs[0]
+            set_paragraph_rtl(p, True)
+            add_run(p, CHART_PROMPT, bold=True, size=10, color=RGBColor(0, 102, 102))
 
             if tab["charts"]:
-                doc.add_paragraph()
-                chart_label = doc.add_paragraph()
-                set_paragraph_rtl(chart_label, True)
-                add_styled_run(chart_label, "وصف المخططات:", bold=True, size=11, rtl=True)
-                chart_label.add_run("  ")
-                add_styled_run(chart_label, "Chart Descriptions:", bold=True, size=11)
-
-                chart_table = doc.add_table(rows=1, cols=4)
-                chart_table.style = "Table Grid"
-                chart_headers = [
-                    ("اسم المخطط (عربي)", True),
-                    ("Chart Name (English)", False),
-                    ("الوصف (عربي)", True),
-                    ("Description (English)", False),
-                ]
-                for i, (header, rtl) in enumerate(chart_headers):
-                    cell = chart_table.rows[0].cells[i]
-                    set_cell_shading(cell, "E6F2F2")
-                    p = cell.paragraphs[0]
-                    if rtl:
-                        set_paragraph_rtl(p, True)
-                    add_styled_run(p, header, bold=True, size=9, rtl=rtl)
-
-                for chart in tab["charts"]:
-                    row = chart_table.add_row().cells
-                    values = [
-                        (chart[0], True),
-                        (chart[1], False),
-                        (chart[2], True),
-                        (chart[3], False),
-                    ]
-                    for i, (text, rtl) in enumerate(values):
-                        p = row[i].paragraphs[0]
-                        if rtl:
-                            set_paragraph_rtl(p, True)
-                        add_styled_run(p, text, size=9, rtl=rtl)
+                for chart_name, chart_desc in tab["charts"]:
+                    cp = charts_cell.add_paragraph()
+                    set_paragraph_rtl(cp, True)
+                    add_run(cp, f"• {chart_name}: ", bold=True, size=10)
+                    add_run(cp, chart_desc, size=10)
+            else:
+                cp = charts_cell.add_paragraph()
+                set_paragraph_rtl(cp, True)
+                add_run(cp, "—", size=10, color=RGBColor(120, 120, 120))
 
             doc.add_paragraph()
 
